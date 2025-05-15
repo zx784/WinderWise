@@ -11,6 +11,7 @@ import { Map, Save, Download, Share2, Copy, MessageCircle, Send, Settings2 } fro
 import PlaceCard from "./PlaceCard";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import jsPDF from 'jspdf';
 
 interface ResultsDisplayProps {
   suggestedCity?: SuggestCityOutput;
@@ -105,17 +106,42 @@ export default function ResultsDisplay({
       return;
     }
     const textContent = formatTripDataForText(false);
-    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
     const fileNameDestination = getDestinationForText()?.replace(/\s+/g, '_') || "Trip";
-    a.download = `WanderWise_Plan_${fileNameDestination}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast({ title: "Download Started", description: "Your trip plan is downloading." });
+    
+    try {
+      const doc = new jsPDF();
+      // Set metadata (optional)
+      doc.setProperties({
+        title: `WanderWise Plan: ${fileNameDestination}`,
+        subject: 'Personalized Travel Itinerary',
+        author: 'WanderWise App',
+      });
+
+      const pageHeight = doc.internal.pageSize.height;
+      const pageWidth = doc.internal.pageSize.width;
+      const margin = 15; // mm
+      let y = margin;
+      const lineHeight = 7; // mm, adjust as needed for font size
+
+      // Split text into lines that fit the page width
+      const lines = doc.splitTextToSize(textContent, pageWidth - (margin * 2));
+
+      lines.forEach((line: string) => {
+        if (y + lineHeight > pageHeight - margin) {
+          doc.addPage();
+          y = margin; // Reset y for new page
+        }
+        doc.text(line, margin, y);
+        y += lineHeight;
+      });
+      
+      doc.save(`WanderWise_Plan_${fileNameDestination}.pdf`);
+      toast({ title: "Download Started", description: "Your trip plan PDF is downloading." });
+
+    } catch (error) {
+      console.error("Failed to generate PDF:", error);
+      toast({ title: "PDF Generation Failed", description: "Could not generate PDF. Please try again.", variant: "destructive" });
+    }
   };
 
   const handleShare = (platform: 'whatsapp' | 'telegram') => {
@@ -222,7 +248,7 @@ export default function ResultsDisplay({
               <Save className="mr-2 h-4 w-4" /> Save Plan
             </Button>
             <Button onClick={handleDownloadPlan} variant="outline" className="flex-grow sm:flex-grow-0">
-              <Download className="mr-2 h-4 w-4" /> Download Plan
+              <Download className="mr-2 h-4 w-4" /> Download PDF
             </Button>
             <Button onClick={() => handleShare('whatsapp')} variant="outline" className="flex-grow sm:flex-grow-0">
               <MessageCircle className="mr-2 h-4 w-4" /> Share on WhatsApp

@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This file defines a Genkit flow for suggesting a destination city based on user preferences.
@@ -17,8 +18,8 @@ const SuggestCityInputSchema = z.object({
     .enum(['budget-friendly', 'mid-range', 'luxury'])
     .describe('The user\u2019s budget preference.'),
   tripDuration: z
-    .enum(['1 day', '3 days', '1 week'])
-    .describe('The preferred trip duration.'),
+    .enum(['1 day', '2 days', '3 days', '1 week', '10 days', '2 weeks', '1 month', 'custom'])
+    .describe('The preferred trip duration. "custom" implies the user might have a specific duration not listed.'),
   travelStyle: z
     .enum(['relaxed', 'adventurous', 'cultural'])
     .describe('The user\u2019s preferred travel style.'),
@@ -46,6 +47,7 @@ const prompt = ai.definePrompt({
   input: {schema: SuggestCityInputSchema},
   output: {schema: SuggestCityOutputSchema},
   prompt: `Based on the user's preferences, suggest a city for them to visit and justify your suggestion with data.
+Consider the trip duration when making a suggestion. For "custom" duration, assume a flexible mid-length trip unless other factors dictate otherwise.
 
 User Preferences:
 Interests: {{#each interests}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}{{#if customInterests}}, and custom interests: {{#each customInterests}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}
@@ -67,3 +69,4 @@ const suggestCityFlow = ai.defineFlow(
     return output!;
   }
 );
+

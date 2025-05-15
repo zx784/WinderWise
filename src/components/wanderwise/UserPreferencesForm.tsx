@@ -1,3 +1,4 @@
+
 "use client";
 
 import type * as React from 'react';
@@ -25,7 +26,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import type { SuggestCityInput, GenerateItineraryInput } from '@/ai/flows/intelligent-city-suggestion'; // Assuming types are co-located or re-exported
+// Assuming types are co-located or re-exported. SuggestCityInput is used for type consistency, actual payload might differ for each flow.
+import type { SuggestCityInput as AISuggestCityInput } from '@/ai/flows/intelligent-city-suggestion'; 
+import type { GenerateItineraryInput as AIGenerateItineraryInput } from '@/ai/flows/ai-itinerary-generation';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UploadCloud, MapPin, CalendarDays, DollarSign, Settings2, Palette, Users, Utensils, TreePine, Landmark, PartyPopper, Backpack, Coffee, BuildingIcon } from 'lucide-react';
 
@@ -46,9 +50,17 @@ const budgetOptions = [
 
 const tripDurationOptions = [
   { value: "1 day", label: "1 Day" },
+  { value: "2 days", label: "2 Days" },
   { value: "3 days", label: "3 Days" },
   { value: "1 week", label: "1 Week" },
+  { value: "10 days", label: "10 Days" },
+  { value: "2 weeks", label: "2 Weeks" },
+  { value: "1 month", label: "1 Month" },
+  { value: "custom", label: "Custom" },
 ] as const;
+
+type TripDurationValue = typeof tripDurationOptions[number]['value'];
+
 
 const travelStyleOptions = [
   { value: "relaxed", label: "Relaxed", icon: Coffee },
@@ -61,12 +73,22 @@ export const formSchema = z.object({
   interests: z.array(z.string()).min(1, { message: "Select at least one interest." }),
   customInterests: z.string().optional(),
   budget: z.enum(['budget-friendly', 'mid-range', 'luxury']),
-  tripDuration: z.enum(['1 day', '3 days', '1 week']),
+  tripDuration: z.enum(["1 day", "2 days", "3 days", "1 week", "10 days", "2 weeks", "1 month", "custom"]),
   travelStyle: z.enum(['relaxed', 'adventurous', 'cultural']),
   imageFile: z.custom<FileList>().optional(),
 });
 
 export type UserPreferencesFormValues = z.infer<typeof formSchema>;
+
+// Ensure AI flow input types match form options
+type ExpectedAISuggestCityTripDuration = AISuggestCityInput['tripDuration'];
+type ExpectedAIGenerateItineraryTripDuration = AIGenerateItineraryInput['tripDuration'];
+
+// This is a type assertion to ensure consistency, it won't run at runtime
+// but will error at build time if types diverge.
+const _tripDurationAssertionSuggest: TripDurationValue = "" as ExpectedAISuggestCityTripDuration;
+const _tripDurationAssertionGenerate: TripDurationValue = "" as ExpectedAIGenerateItineraryTripDuration;
+
 
 interface UserPreferencesFormProps {
   onSubmit: (values: UserPreferencesFormValues) => void;
@@ -226,6 +248,9 @@ export default function UserPreferencesForm({ onSubmit, isLoading }: UserPrefere
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormDescription>
+                      Select "Custom" if you have a specific number of days not listed. The AI will adapt.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -288,3 +313,4 @@ export default function UserPreferencesForm({ onSubmit, isLoading }: UserPrefere
     </Card>
   );
 }
+

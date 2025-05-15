@@ -1,3 +1,4 @@
+
 // This is a server-side file.
 'use server';
 
@@ -20,8 +21,8 @@ const GenerateItineraryInputSchema = z.object({
     .enum(['budget-friendly', 'mid-range', 'luxury'])
     .describe('The user budget preference.'),
   tripDuration: z
-    .enum(['1 day', '3 days', '1 week'])
-    .describe('The duration of the trip.'),
+    .enum(['1 day', '2 days', '3 days', '1 week', '10 days', '2 weeks', '1 month', 'custom'])
+    .describe('The duration of the trip. "custom" means the user has a specific duration not listed, the AI should try to accommodate.'),
   travelStyle: z
     .enum(['relaxed', 'adventurous', 'cultural'])
     .describe('The user travel style.'),
@@ -58,6 +59,7 @@ const prompt = ai.definePrompt({
   input: {schema: GenerateItineraryInputSchema},
   output: {schema: GenerateItineraryOutputSchema},
   prompt: `You are an expert travel assistant. Generate a personalized, day-by-day itinerary based on the user's preferences.
+If tripDuration is "custom", aim for a reasonable default like 5-7 days unless other factors strongly suggest otherwise.
 
 Destination City: {{{destinationCity}}}
 Interests: {{#each interests}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}

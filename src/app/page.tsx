@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useState } from "react";
-import { useRouter } from 'next/navigation'; // Added for redirection
-import { useAuth } from "@/context/AuthContext"; // Added to check auth state
+import { useState, useEffect } from "react"; // Added useEffect
+import { useRouter } from 'next/navigation';
+import { useAuth } from "@/context/AuthContext";
 import UserPreferencesForm, { type UserPreferencesFormValues } from "@/components/wanderwise/UserPreferencesForm";
 import ResultsDisplay from "@/components/wanderwise/ResultsDisplay";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
@@ -13,7 +13,6 @@ import { suggestCity, type SuggestCityInput, type SuggestCityOutput } from "@/ai
 import { generateItinerary, type GenerateItineraryInput, type GenerateItineraryOutput } from "@/ai/flows/ai-itinerary-generation";
 import { useToast } from "@/hooks/use-toast";
 
-// New Home Page Sections
 import AboutSection from "@/components/home/AboutSection";
 import ServicesSection from "@/components/home/ServicesSection";
 import ContactSection from "@/components/home/ContactSection";
@@ -26,11 +25,11 @@ export default function HomePage() {
   const [itineraryResult, setItineraryResult] = useState<GenerateItineraryOutput | undefined>(undefined);
   const [uploadedImageFileName, setUploadedImageFileName] = useState<string | undefined>(undefined);
   const [finalDestinationCityForDisplay, setFinalDestinationCityForDisplay] = useState<string | undefined>(undefined);
-  const [showForm, setShowForm] = useState(false);
+  // showForm state is no longer needed as form visibility is tied to currentUser
 
   const { toast } = useToast();
-  const { currentUser } = useAuth(); // Get current user from AuthContext
-  const router = useRouter(); // Initialize router
+  const { currentUser } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (values: UserPreferencesFormValues, processedTripDuration: string) => {
     setIsLoading(true);
@@ -43,7 +42,6 @@ export default function HomePage() {
     let finalDestinationCity = values.destinationCity;
 
     try {
-      // Step 1: Suggest city if not provided
       if (!finalDestinationCity) {
         const suggestCityPayload: SuggestCityInput = {
           interests: values.interests,
@@ -67,7 +65,6 @@ export default function HomePage() {
          throw new Error("Destination city is required to generate an itinerary.");
       }
 
-      // Step 2: Generate itinerary
       const itineraryPayload: GenerateItineraryInput = {
         destinationCity: finalDestinationCity,
         interests: values.interests,
@@ -99,33 +96,31 @@ export default function HomePage() {
     }
   };
 
-  const handleGetStartedClick = () => {
-    if (currentUser) { // If user is logged in
-      setShowForm(true); // Show the planning form
-    } else { // If user is not logged in
-      router.push('/auth/login'); // Redirect to login page
-    }
-  };
+  // The handleGetStartedClick function is removed as its logic is simplified
+  // and handled by the conditional rendering of the "Get Started" button.
 
   return (
-    <div className="space-y-12"> {/* Added more spacing */}
-      {/* Hero Section - Integrated existing form toggle here */}
-      <section className="text-center py-12 md:py-20 bg-card dark:bg-slate-800/50 rounded-xl shadow-xl">
-        <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">
-          Discover Your Next Adventure with WanderWise
-        </h1>
-        <p className="text-lg md:text-xl text-foreground/80 mb-8 max-w-2xl mx-auto">
-          Let our AI craft personalized travel plans tailored to your interests, budget, and style.
-          Spend less time planning and more time exploring!
-        </p>
-        {!showForm && (
-          <Button size="lg" onClick={handleGetStartedClick} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+    <div className="space-y-12">
+      {!currentUser ? (
+        // Logged-out view: Hero with "Get Started" button linking to login
+        <section className="text-center py-12 md:py-20 bg-card dark:bg-slate-800/50 rounded-xl shadow-xl">
+          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">
+            Discover Your Next Adventure with WanderWise
+          </h1>
+          <p className="text-lg md:text-xl text-foreground/80 mb-8 max-w-2xl mx-auto">
+            Let our AI craft personalized travel plans tailored to your interests, budget, and style.
+            Spend less time planning and more time exploring!
+          </p>
+          <Button 
+            size="lg" 
+            onClick={() => router.push('/auth/login')} 
+            className="bg-accent hover:bg-accent/90 text-accent-foreground"
+          >
             <Sparkles className="mr-2 h-5 w-5" /> Get Started
           </Button>
-        )}
-      </section>
-
-      {showForm && (
+        </section>
+      ) : (
+        // Logged-in view: Show the UserPreferencesForm (Generate Plan feature)
         <section id="plan-trip">
           <UserPreferencesForm onSubmit={handleSubmit} isLoading={isLoading} />
         </section>
@@ -150,7 +145,7 @@ export default function HomePage() {
         />
       )}
 
-      {/* New Informational Sections */}
+      {/* Informational Sections - always visible */}
       <section id="about-us">
         <AboutSection />
       </section>

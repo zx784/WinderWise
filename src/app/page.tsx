@@ -6,10 +6,16 @@ import UserPreferencesForm, { type UserPreferencesFormValues } from "@/component
 import ResultsDisplay from "@/components/wanderwise/ResultsDisplay";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal } from "lucide-react";
+import { Terminal, Sparkles } from "lucide-react";
 import { suggestCity, type SuggestCityInput, type SuggestCityOutput } from "@/ai/flows/intelligent-city-suggestion";
 import { generateItinerary, type GenerateItineraryInput, type GenerateItineraryOutput } from "@/ai/flows/ai-itinerary-generation";
 import { useToast } from "@/hooks/use-toast";
+
+// New Home Page Sections
+import AboutSection from "@/components/home/AboutSection";
+import ServicesSection from "@/components/home/ServicesSection";
+import ContactSection from "@/components/home/ContactSection";
+import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +24,7 @@ export default function HomePage() {
   const [itineraryResult, setItineraryResult] = useState<GenerateItineraryOutput | undefined>(undefined);
   const [uploadedImageFileName, setUploadedImageFileName] = useState<string | undefined>(undefined);
   const [finalDestinationCityForDisplay, setFinalDestinationCityForDisplay] = useState<string | undefined>(undefined);
+  const [showForm, setShowForm] = useState(false); // State to toggle form visibility
 
   const { toast } = useToast();
 
@@ -37,7 +44,7 @@ export default function HomePage() {
         const suggestCityPayload: SuggestCityInput = {
           interests: values.interests,
           budget: values.budget,
-          tripDuration: processedTripDuration, // Use processed duration
+          tripDuration: processedTripDuration,
           travelStyle: values.travelStyle,
           customInterests: values.customInterests ? values.customInterests.split(',').map(s => s.trim()).filter(s => s) : [],
         };
@@ -50,7 +57,7 @@ export default function HomePage() {
         }
       }
       
-      setFinalDestinationCityForDisplay(finalDestinationCity); // Set for display
+      setFinalDestinationCityForDisplay(finalDestinationCity); 
 
       if (!finalDestinationCity) {
          throw new Error("Destination city is required to generate an itinerary.");
@@ -61,7 +68,7 @@ export default function HomePage() {
         destinationCity: finalDestinationCity,
         interests: values.interests,
         budget: values.budget,
-        tripDuration: processedTripDuration, // Use processed duration
+        tripDuration: processedTripDuration, 
         travelStyle: values.travelStyle,
       };
       
@@ -89,10 +96,30 @@ export default function HomePage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <UserPreferencesForm onSubmit={handleSubmit} isLoading={isLoading} />
+    <div className="space-y-12"> {/* Added more spacing */}
+      {/* Hero Section - Integrated existing form toggle here */}
+      <section className="text-center py-12 md:py-20 bg-card dark:bg-slate-800/50 rounded-xl shadow-xl">
+        <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">
+          Discover Your Next Adventure with WanderWise
+        </h1>
+        <p className="text-lg md:text-xl text-foreground/80 mb-8 max-w-2xl mx-auto">
+          Let our AI craft personalized travel plans tailored to your interests, budget, and style.
+          Spend less time planning and more time exploring!
+        </p>
+        {!showForm && (
+          <Button size="lg" onClick={() => setShowForm(true)} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+            <Sparkles className="mr-2 h-5 w-5" /> Get Started
+          </Button>
+        )}
+      </section>
 
-      {isLoading && <LoadingSpinner text="Crafting your perfect journey..." />}
+      {showForm && (
+        <section id="plan-trip">
+          <UserPreferencesForm onSubmit={handleSubmit} isLoading={isLoading} />
+        </section>
+      )}
+
+      {isLoading && <div className="flex justify-center py-8"><LoadingSpinner text="Crafting your perfect journey..." /></div>}
 
       {error && !isLoading && (
         <Alert variant="destructive" className="mt-8">
@@ -110,7 +137,17 @@ export default function HomePage() {
           finalDestinationCityToDisplay={finalDestinationCityForDisplay}
         />
       )}
+
+      {/* New Informational Sections */}
+      <section id="about-us">
+        <AboutSection />
+      </section>
+      <section id="our-services">
+        <ServicesSection />
+      </section>
+      <section id="contact-us">
+        <ContactSection />
+      </section>
     </div>
   );
 }
-

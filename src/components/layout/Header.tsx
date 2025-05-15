@@ -2,11 +2,11 @@
 "use client";
 
 import Link from 'next/link';
-import { Plane, LogIn, UserPlus, UserCircle, LogOut, LayoutDashboard, Info, ListChecks, Mail } from 'lucide-react';
+import { Plane, LogIn, UserPlus, UserCircle, LogOut, LayoutDashboard, Library } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { auth } from '@/lib/firebase';
 import { signOut as firebaseSignOut } from 'firebase/auth';
-import { useRouter } from 'next/navigation'; // Use App Router's navigation
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -27,8 +27,8 @@ export default function Header() {
     try {
       await firebaseSignOut(auth);
       toast({ title: 'Logged Out', description: 'You have been successfully logged out.' });
-      router.push('/'); // Redirect to home page after logout
-    } catch (error: any) {
+      router.push('/');
+    } catch (error: any) { // Corrected: removed "->"
       console.error('Logout Error:', error);
       toast({ title: 'Logout Failed', description: error.message, variant: 'destructive' });
     }
@@ -41,12 +41,12 @@ export default function Header() {
           <Plane className="h-8 w-8 transform rotate-[-45deg]" />
           <span>WanderWise</span>
         </Link>
-        
+
         <nav className="flex items-center gap-3 md:gap-4">
           <Link href="/about" className="text-sm hover:text-sky-200 transition-colors hidden md:inline">About</Link>
           <Link href="/services" className="text-sm hover:text-sky-200 transition-colors hidden md:inline">Services</Link>
           <Link href="/contact" className="text-sm hover:text-sky-200 transition-colors hidden md:inline">Contact</Link>
-          
+
           {currentUser ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -62,12 +62,18 @@ export default function Header() {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
                   My Account
+                  {currentUser.displayName && <p className="text-sm font-semibold text-foreground truncate">{currentUser.displayName}</p>}
                   {currentUser.email && <p className="text-xs font-normal text-muted-foreground truncate">{currentUser.email}</p>}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/profile" className="flex items-center cursor-pointer">
                     <LayoutDashboard className="mr-2 h-4 w-4" /> Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/saved-plans" className="flex items-center cursor-pointer">
+                    <Library className="mr-2 h-4 w-4" /> Saved Plans
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400 focus:text-red-700 focus:bg-red-100 dark:focus:bg-red-700/20 cursor-pointer">
@@ -89,7 +95,6 @@ export default function Header() {
               </Button>
             </>
           )}
-          {/* Mobile menu trigger can be added here if needed */}
         </nav>
       </div>
     </header>

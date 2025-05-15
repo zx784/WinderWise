@@ -28,7 +28,7 @@ export default function Header() {
       await firebaseSignOut(auth);
       toast({ title: 'Logged Out', description: 'You have been successfully logged out.' });
       router.push('/');
-    } catch (error: any) { // Corrected: removed "->"
+    } catch (error: any) {
       console.error('Logout Error:', error);
       toast({ title: 'Logout Failed', description: error.message, variant: 'destructive' });
     }

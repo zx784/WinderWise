@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
+import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import UserPreferencesForm, { type UserPreferencesFormValues } from "@/components/wanderwise/UserPreferencesForm";
 import ResultsDisplay from "@/components/wanderwise/ResultsDisplay";
@@ -13,9 +14,7 @@ import { suggestCity, type SuggestCityInput, type SuggestCityOutput } from "@/ai
 import { generateItinerary, type GenerateItineraryInput, type GenerateItineraryOutput } from "@/ai/flows/ai-itinerary-generation";
 import { useToast } from "@/hooks/use-toast";
 
-import AboutSection from "@/components/home/AboutSection";
-import ServicesSection from "@/components/home/ServicesSection";
-import ContactSection from "@/components/home/ContactSection";
+import OurTeamSection from "@/components/home/OurTeamSection"; // Import the new OurTeamSection
 import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
@@ -124,34 +123,41 @@ export default function HomePage() {
           )}
         </>
       ) : (
-        // Logged-out view: Hero with "Get Started" and informational sections
+        // Logged-out view: Hero with cover image, "Get Started" card, and Our Team section
         <>
-          <section className="text-center py-12 md:py-20 bg-card dark:bg-slate-800/50 rounded-xl shadow-xl">
-            <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">
-              Discover Your Next Adventure with WanderWise
-            </h1>
-            <p className="text-lg md:text-xl text-foreground/80 mb-8 max-w-2xl mx-auto">
-              Let our AI craft personalized travel plans tailored to your interests, budget, and style.
-              Spend less time planning and more time exploring!
-            </p>
-            <Button 
-              size="lg" 
-              onClick={() => router.push('/auth/login')} 
-              className="bg-accent hover:bg-accent/90 text-accent-foreground"
-            >
-              <Sparkles className="mr-2 h-5 w-5" /> Get Started
-            </Button>
+          <section className="relative h-[calc(100vh-150px)] min-h-[400px] md:min-h-[500px] flex flex-col items-center justify-center text-center text-white -mx-4 -mt-8 sm:-mx-6 md:-mx-8">
+            {/* Full-width cover image */}
+            <Image
+              src="https://placehold.co/1920x1080.png"
+              alt="Inspiring travel destination background"
+              fill
+              style={{ objectFit: "cover" }}
+              className="z-0 brightness-50"
+              priority
+              data-ai-hint="travel landscape"
+            />
+            {/* Overlay content - "Get Started" Card */}
+            <div className="relative z-10 p-6 md:p-8 bg-card/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl max-w-2xl mx-auto">
+              <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">
+                Discover Your Next Adventure with WanderWise
+              </h1>
+              <p className="text-lg md:text-xl text-foreground/90 mb-8">
+                Let our AI craft personalized travel plans tailored to your interests, budget, and style.
+                Spend less time planning and more time exploring!
+              </p>
+              <Button 
+                size="lg" 
+                onClick={() => router.push('/auth/login')} 
+                className="bg-accent hover:bg-accent/90 text-accent-foreground"
+              >
+                <Sparkles className="mr-2 h-5 w-5" /> Get Started
+              </Button>
+            </div>
           </section>
 
-          {/* Informational Sections - visible when logged out on homepage */}
-          <section>
-            <AboutSection />
-          </section>
-          <section>
-            <ServicesSection />
-          </section>
-          <section>
-            <ContactSection />
+          {/* Our Team Section - visible when logged out on homepage */}
+          <section className="mt-12">
+            <OurTeamSection />
           </section>
         </>
       )}

@@ -2,6 +2,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from 'next/navigation'; // Added for redirection
+import { useAuth } from "@/context/AuthContext"; // Added to check auth state
 import UserPreferencesForm, { type UserPreferencesFormValues } from "@/components/wanderwise/UserPreferencesForm";
 import ResultsDisplay from "@/components/wanderwise/ResultsDisplay";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
@@ -24,9 +26,11 @@ export default function HomePage() {
   const [itineraryResult, setItineraryResult] = useState<GenerateItineraryOutput | undefined>(undefined);
   const [uploadedImageFileName, setUploadedImageFileName] = useState<string | undefined>(undefined);
   const [finalDestinationCityForDisplay, setFinalDestinationCityForDisplay] = useState<string | undefined>(undefined);
-  const [showForm, setShowForm] = useState(false); // State to toggle form visibility
+  const [showForm, setShowForm] = useState(false);
 
   const { toast } = useToast();
+  const { currentUser } = useAuth(); // Get current user from AuthContext
+  const router = useRouter(); // Initialize router
 
   const handleSubmit = async (values: UserPreferencesFormValues, processedTripDuration: string) => {
     setIsLoading(true);
@@ -95,6 +99,14 @@ export default function HomePage() {
     }
   };
 
+  const handleGetStartedClick = () => {
+    if (currentUser) { // If user is logged in
+      setShowForm(true); // Show the planning form
+    } else { // If user is not logged in
+      router.push('/auth/login'); // Redirect to login page
+    }
+  };
+
   return (
     <div className="space-y-12"> {/* Added more spacing */}
       {/* Hero Section - Integrated existing form toggle here */}
@@ -107,7 +119,7 @@ export default function HomePage() {
           Spend less time planning and more time exploring!
         </p>
         {!showForm && (
-          <Button size="lg" onClick={() => setShowForm(true)} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+          <Button size="lg" onClick={handleGetStartedClick} className="bg-accent hover:bg-accent/90 text-accent-foreground">
             <Sparkles className="mr-2 h-5 w-5" /> Get Started
           </Button>
         )}

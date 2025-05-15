@@ -17,6 +17,7 @@ export default function HomePage() {
   const [suggestedCityResult, setSuggestedCityResult] = useState<SuggestCityOutput | undefined>(undefined);
   const [itineraryResult, setItineraryResult] = useState<GenerateItineraryOutput | undefined>(undefined);
   const [uploadedImageFileName, setUploadedImageFileName] = useState<string | undefined>(undefined);
+  const [finalDestinationCityForDisplay, setFinalDestinationCityForDisplay] = useState<string | undefined>(undefined);
 
   const { toast } = useToast();
 
@@ -26,6 +27,7 @@ export default function HomePage() {
     setSuggestedCityResult(undefined);
     setItineraryResult(undefined);
     setUploadedImageFileName(values.imageFile?.[0]?.name);
+    setFinalDestinationCityForDisplay(undefined);
 
     let finalDestinationCity = values.destinationCity;
 
@@ -47,6 +49,8 @@ export default function HomePage() {
           throw new Error("AI could not suggest a city. Please try specifying one or adjusting your preferences.");
         }
       }
+      
+      setFinalDestinationCityForDisplay(finalDestinationCity); // Set for display
 
       if (!finalDestinationCity) {
          throw new Error("Destination city is required to generate an itinerary.");
@@ -103,6 +107,7 @@ export default function HomePage() {
           suggestedCity={suggestedCityResult}
           itineraryData={itineraryResult}
           uploadedImageFileName={uploadedImageFileName}
+          finalDestinationCityToDisplay={finalDestinationCityForDisplay}
         />
       )}
     </div>

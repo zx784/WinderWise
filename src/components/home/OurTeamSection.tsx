@@ -3,28 +3,35 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import Image from "next/image";
 
-// Placeholder data for team members
+// Updated team members data
 const teamMembers = [
   {
-    name: "Alice Wonderland",
-    role: "Chief Visionary Officer",
+    name: "Faisal Karissan",
+    role: "Aspiring Data Scientist & Backend Developer",
     imageUrl: "https://placehold.co/300x300.png",
-    bio: "Alice dreams up the future of travel, ensuring every journey is magical.",
-    dataAiHint: "professional woman"
-  },
-  {
-    name: "Bob The Builder",
-    role: "Lead AI Architect",
-    imageUrl: "https://placehold.co/300x300.png",
-    bio: "Bob constructs the intelligent systems that power WanderWise.",
+    bio: "Faisal is passionate about leveraging data and building robust backend systems.",
     dataAiHint: "professional man"
   },
   {
-    name: "Carol Traveler",
-    role: "Head of User Experience",
+    name: "Monsur Shukla",
+    role: "Frontend Developer",
     imageUrl: "https://placehold.co/300x300.png",
-    bio: "Carol ensures that WanderWise is intuitive and delightful to use.",
-    dataAiHint: "person smiling"
+    bio: "Monsur focuses on creating intuitive and engaging user interfaces.",
+    dataAiHint: "developer coding"
+  },
+  {
+    name: "Abdul Karim Bawazir",
+    role: "UI/UX Developer",
+    imageUrl: "https://placehold.co/300x300.png",
+    bio: "Abdul Karim designs seamless and user-centered experiences.",
+    dataAiHint: "designer thinking"
+  },
+  {
+    name: "Amruish Sharafi",
+    role: "Frontend Developer",
+    imageUrl: "https://placehold.co/300x300.png",
+    bio: "Amruish brings designs to life with clean and efficient frontend code.",
+    dataAiHint: "person computer"
   },
 ];
 
@@ -40,9 +47,9 @@ export default function OurTeamSection() {
       <CardContent className="space-y-8">
         <p className="text-lg text-foreground/80">
           We are a passionate group of innovators, designers, and travel enthusiasts dedicated to making your
-          adventures unforgettable. (Placeholder text)
+          adventures unforgettable.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"> {/* Adjusted grid for potentially 4 members */}
           {teamMembers.map((member) => (
             <Card key={member.name} className="overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
               <div className="relative h-56 w-full">

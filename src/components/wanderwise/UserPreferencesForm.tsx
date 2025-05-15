@@ -289,10 +289,9 @@ export default function UserPreferencesForm({ onSubmit, isLoading }: UserPrefere
                         <FormLabel>Number of Days (Custom)</FormLabel>
                         <FormControl>
                           <Input 
-                            type="number" 
+                            type="text"
                             placeholder="E.g., 5" 
                             {...field} 
-                            min="1"
                             value={field.value ?? ""}
                             onChange={(e) => {
                                 const val = e.target.value;

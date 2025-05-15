@@ -101,11 +101,13 @@ export default function UserPreferencesForm({ onSubmit, isLoading }: UserPrefere
   const form = useForm<UserPreferencesFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      destinationCity: "", // Initialize to empty string
       interests: [],
+      customInterests: "", // Initialize to empty string
       budget: "mid-range",
       tripDuration: "3 days",
-      travelStyle: "cultural",
       customTripDurationDays: "",
+      travelStyle: "cultural",
     },
   });
 
@@ -143,7 +145,7 @@ export default function UserPreferencesForm({ onSubmit, isLoading }: UserPrefere
                 <FormItem>
                   <FormLabel className="text-lg font-semibold flex items-center gap-2"><MapPin className="text-accent"/>Destination City (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="E.g., Paris, Kyoto, Rome" {...field} />
+                    <Input placeholder="E.g., Paris, Kyoto, Rome" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormDescription>
                     Leave blank for an AI-powered suggestion based on your preferences.
@@ -208,7 +210,7 @@ export default function UserPreferencesForm({ onSubmit, isLoading }: UserPrefere
                 <FormItem>
                   <FormLabel className="text-lg font-semibold">Custom Interests</FormLabel>
                   <FormControl>
-                    <Input placeholder="E.g., street art, vintage shopping, specific cuisines" {...field} />
+                    <Input placeholder="E.g., street art, vintage shopping, specific cuisines" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormDescription>
                     Add any other interests, separated by commas.

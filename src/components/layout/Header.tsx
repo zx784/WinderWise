@@ -35,26 +35,26 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 dark:from-blue-700 dark:via-indigo-700 dark:to-purple-800 text-primary-foreground shadow-md sticky top-0 z-50">
+    <header className="bg-card text-foreground shadow-md sticky top-0 z-50 border-b"> {/* Changed background, text color, added border */}
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 text-2xl font-bold hover:opacity-90 transition-opacity">
-          <Plane className="h-8 w-8 transform rotate-[-45deg]" />
-          <span>WanderWise</span>
+        <Link href="/" className="flex items-center gap-2 text-2xl font-bold hover:opacity-80 transition-opacity">
+          <Plane className="h-8 w-8 transform rotate-[-45deg] text-primary" /> {/* Logo icon uses primary color */}
+          <span className="text-foreground">WanderWise</span> {/* Ensure title uses foreground color */}
         </Link>
 
         <nav className="flex items-center gap-3 md:gap-4">
-          <Link href="/about" className="text-sm hover:text-sky-200 transition-colors hidden md:inline">About</Link>
-          <Link href="/services" className="text-sm hover:text-sky-200 transition-colors hidden md:inline">Services</Link>
-          <Link href="/contact" className="text-sm hover:text-sky-200 transition-colors hidden md:inline">Contact</Link>
+          <Link href="/about" className="text-sm text-foreground hover:text-primary transition-colors hidden md:inline">About</Link>
+          <Link href="/services" className="text-sm text-foreground hover:text-primary transition-colors hidden md:inline">Services</Link>
+          <Link href="/contact" className="text-sm text-foreground hover:text-primary transition-colors hidden md:inline">Contact</Link>
 
           {currentUser ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="rounded-full h-9 w-9 p-0 hover:bg-white/20">
+                <Button variant="ghost" className="rounded-full h-9 w-9 p-0 hover:bg-accent/10">
                   {currentUser.photoURL ? (
                     <img src={currentUser.photoURL} alt="User" className="h-8 w-8 rounded-full" />
                   ) : (
-                    <UserCircle className="h-7 w-7" />
+                    <UserCircle className="h-7 w-7 text-muted-foreground hover:text-primary" />
                   )}
                   <span className="sr-only">User menu</span>
                 </Button>
@@ -76,19 +76,19 @@ export default function Header() {
                     <Library className="mr-2 h-4 w-4" /> Saved Plans
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400 focus:text-red-700 focus:bg-red-100 dark:focus:bg-red-700/20 cursor-pointer">
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" /> Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <>
-              <Button variant="outline" size="sm" asChild className="border-white/80 text-white hover:bg-white/10 hover:text-white">
+              <Button variant="ghost" size="sm" asChild className="text-foreground hover:text-primary hover:bg-accent/10">
                 <Link href="/auth/login">
                   <LogIn className="mr-1.5 h-4 w-4" /> Login
                 </Link>
               </Button>
-              <Button size="sm" asChild className="bg-sky-300 text-indigo-700 hover:bg-sky-200">
+              <Button variant="outline" size="sm" asChild className="text-primary border-primary hover:bg-primary hover:text-primary-foreground">
                 <Link href="/auth/signup">
                   <UserPlus className="mr-1.5 h-4 w-4" /> Sign Up
                 </Link>

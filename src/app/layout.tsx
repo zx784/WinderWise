@@ -28,13 +28,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen bg-gradient-to-br from-sky-100 via-blue-100 to-indigo-100 dark:from-slate-900 dark:via-blue-950 dark:to-indigo-950`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}> {/* Removed gradient classes */}
         <AuthProvider> {/* Wrap with AuthProvider */}
           <Header />
           <main className="flex-grow container mx-auto px-4 py-8"> {/* Add flex-grow and container styling */}
             {children}
           </main>
-          <footer className="bg-card text-card-foreground py-6 text-center text-sm">
+          <footer className="bg-card text-card-foreground py-6 text-center text-sm border-t"> {/* Added border-t for separation */}
             <div className="container mx-auto px-4">
               <p>&copy; {new Date().getFullYear()} WanderWise. All rights reserved.</p>
               <div className="mt-2">

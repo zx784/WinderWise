@@ -5,106 +5,101 @@
 
 @layer base {
   :root {
-    /* Palette: https://colorhunt.co/palette/5409da4e71ff8dd8ffbbfbff */
-    /* Dark Purple-Blue: #5409DA */
-    /* Bright Blue: #4E71FF */
-    /* Light Blue: #8DD8FF */
-    /* Pale Cyan: #BBFBFF */
-
-    --background: 200 100% 94%; /* Pale Cyan - BBFBFF */
-    --foreground: 254 92% 25%; /* Dark Purple-Blue for text - 5409DA */
+    /* Expedia-inspired Light Theme */
+    --background: 240 8% 96%; /* Very light grey (e.g., #F5F5F7) */
+    --foreground: 220 15% 25%; /* Dark grey/almost black for text (e.g., #383D48) */
     
-    --card: 0 0% 100%; /* White for cards */
-    --card-foreground: 254 92% 25%; /* Dark Purple-Blue */
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 220 15% 25%;
     
-    --popover: 0 0% 100%; /* White for popovers */
-    --popover-foreground: 254 92% 25%;
+    --popover: 0 0% 100%; /* White */
+    --popover-foreground: 220 15% 25%;
     
-    --primary: 227 100% 65%; /* Bright Blue - 4E71FF */
-    --primary-foreground: 200 100% 94%; /* Pale Cyan for text on primary */
+    --primary: 223 69% 53%; /* Expedia Blue (e.g., #3662D8) */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
     
-    --secondary: 203 100% 77%; /* Light Blue - 8DD8FF */
-    --secondary-foreground: 227 100% 30%; /* Darker shade of Bright Blue for text on secondary */
+    --secondary: 220 15% 90%; /* Light grey (e.g., #DFE2E7) */
+    --secondary-foreground: 220 15% 35%; /* Darker grey text for secondary (e.g., #4D5360) */
     
-    --muted: 203 100% 88%; /* Lighter version of Light Blue */
-    --muted-foreground: 227 100% 45%; /* Muted Bright Blue */
+    --muted: 220 15% 95%; /* Even lighter grey (e.g., #F1F2F4) */
+    --muted-foreground: 220 15% 55%; /* Medium grey for muted text (e.g., #7C8290) */
     
-    --accent: 254 92% 45%; /* Dark Purple-Blue for accents - 5409DA */
-    --accent-foreground: 0 0% 100%; /* White for text on accent */
+    --accent: 223 69% 53%; /* Expedia Blue for accents */
+    --accent-foreground: 0 0% 100%; /* White text on accent */
     
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84.2% 60.2%; /* Standard Red */
     --destructive-foreground: 0 0% 98%;
     
-    --border: 203 100% 80%; /* Slightly darker Light Blue */
-    --input: 0 0% 100%;    /* White for input background */
-    --ring: 227 100% 65%;   /* Bright Blue for focus rings */
+    --border: 220 15% 88%; /* Subtle light grey border (e.g., #D8DCE1) */
+    --input: 0 0% 100%;    /* White input background */
+    --ring: 223 69% 53%;   /* Expedia Blue for focus rings */
     
     --radius: 0.5rem;
 
     /* Chart colors - updated to blue theme */
-    --chart-1: 227 100% 65%; /* Bright Blue */
-    --chart-2: 203 100% 77%; /* Light Blue */
-    --chart-3: 254 92% 45%; /* Dark Purple-Blue */
-    --chart-4: 215 100% 70%; /* Another shade of blue */
-    --chart-5: 190 100% 85%; /* Very Light Blue/Cyan */
+    --chart-1: 223 69% 53%; /* Primary Blue */
+    --chart-2: 223 60% 65%; /* Lighter Primary Blue */
+    --chart-3: 220 15% 50%; /* Medium Grey */
+    --chart-4: 223 50% 75%; /* Even Lighter Primary Blue */
+    --chart-5: 220 15% 70%; /* Light Grey */
 
-    /* Sidebar variables - updated to blue theme */
-    --sidebar-background: 254 92% 30%; /* Darker Purple-Blue */
-    --sidebar-foreground: 200 100% 90%; /* Light Cyan/White */
-    --sidebar-primary: 227 100% 75%;    /* Lighter Bright Blue */
-    --sidebar-primary-foreground: 254 92% 20%; /* Very Dark Purple-Blue */
-    --sidebar-accent: 227 100% 65%;     /* Bright Blue */
-    --sidebar-accent-foreground: 0 0% 100%; /* White */
-    --sidebar-border: 254 92% 40%;      /* Mid Purple-Blue */
-    --sidebar-ring: 203 100% 77%;       /* Light Blue */
+    /* Sidebar variables - updated for consistency */
+    --sidebar-background: 220 15% 18%; /* Dark Grey, similar to dark card */
+    --sidebar-foreground: 0 0% 95%;    /* Light text */
+    --sidebar-primary: 223 75% 65%;    /* Brighter Blue for dark bg */
+    --sidebar-primary-foreground: 0 0% 100%; /* White text */
+    --sidebar-accent: 223 75% 65%;     /* Brighter Blue */
+    --sidebar-accent-foreground: 0 0% 100%; /* White text */
+    --sidebar-border: 220 15% 25%;      /* Darker border */
+    --sidebar-ring: 223 75% 65%;       /* Brighter Blue */
   }
 
   .dark {
-    /* Dark Theme based on the blue palette */
-    --background: 254 92% 12%;  /* Very Dark Purple-Blue - darker version of 5409DA */
-    --foreground: 200 100% 94%; /* Pale Cyan - BBFBFF */
+    /* Expedia-inspired Dark Theme */
+    --background: 220 15% 12%;  /* Very Dark Grey (e.g., #1A1D23) */
+    --foreground: 220 10% 90%; /* Light grey/off-white text (e.g., #E0E2E7) */
     
-    --card: 254 92% 18%; /* Darker Purple-Blue for cards */
-    --card-foreground: 200 100% 94%;
+    --card: 220 15% 18%; /* Dark Grey (e.g., #262A32) */
+    --card-foreground: 220 10% 90%;
     
-    --popover: 254 92% 18%;
-    --popover-foreground: 200 100% 94%;
+    --popover: 220 15% 18%;
+    --popover-foreground: 220 10% 90%;
     
-    --primary: 227 100% 70%; /* Brighter Bright Blue - 4E71FF variant */
-    --primary-foreground: 254 92% 10%; /* Very Dark for text on primary */
+    --primary: 223 75% 65%; /* Brighter Blue for dark mode (e.g., #6488F0) */
+    --primary-foreground: 220 15% 10%; /* Dark text on primary buttons for contrast */
     
-    --secondary: 203 100% 60%; /* Muted Light Blue - 8DD8FF variant */
-    --secondary-foreground: 200 100% 94%;
+    --secondary: 220 15% 25%; /* Dark Muted Grey (e.g., #363B47) */
+    --secondary-foreground: 220 10% 75%; /* Lighter grey text (e.g., #B6BBC3) */
     
-    --muted: 254 92% 22%; /* Dark Muted Purple-Blue */
-    --muted-foreground: 203 100% 80%; /* Lighter Light Blue */
+    --muted: 220 15% 20%; /* Darker Muted Grey (e.g., #2C303A) */
+    --muted-foreground: 220 10% 60%; /* Medium-Light Grey (e.g., #8F96A3) */
     
-    --accent: 227 100% 75%; /* Lighter Bright Blue for accents */
-    --accent-foreground: 254 92% 10%; /* Very Dark for text on accent */
+    --accent: 223 75% 65%; /* Brighter Blue for accents */
+    --accent-foreground: 220 15% 10%; /* Dark text on accent */
     
-    --destructive: 0 70% 50%;
+    --destructive: 0 62.8% 50.6%; /* Darker Red */
     --destructive-foreground: 0 0% 98%;
     
-    --border: 254 92% 25%;      /* Dark Purple-Blue border */
-    --input: 254 92% 20%;       /* Slightly lighter Dark Purple-Blue for input background */
-    --ring: 227 100% 70%;       /* Brighter Bright Blue for rings */
+    --border: 220 15% 25%;      /* Dark grey border (e.g., #363B47) */
+    --input: 220 15% 16%;       /* Slightly darker input bg (e.g., #20242B) */
+    --ring: 223 75% 65%;       /* Brighter Blue for rings */
 
-    /* Chart colors for dark theme - can be same or adjusted */
-    --chart-1: 227 100% 70%;
-    --chart-2: 203 100% 60%;
-    --chart-3: 254 92% 50%;
-    --chart-4: 215 100% 75%;
-    --chart-5: 190 100% 80%;
+    /* Chart colors for dark theme */
+    --chart-1: 223 75% 65%;
+    --chart-2: 223 65% 75%;
+    --chart-3: 220 10% 60%;
+    --chart-4: 223 55% 85%;
+    --chart-5: 220 10% 45%;
     
     /* Sidebar variables for dark theme */
-    --sidebar-background: 254 92% 10%;  /* Even Darker Purple-Blue */
-    --sidebar-foreground: 200 100% 90%;
-    --sidebar-primary: 227 100% 70%;
-    --sidebar-primary-foreground: 254 92% 5%;
-    --sidebar-accent: 227 100% 75%;
-    --sidebar-accent-foreground: 254 92% 10%;
-    --sidebar-border: 254 92% 15%;
-    --sidebar-ring: 203 100% 60%;
+    --sidebar-background: 220 15% 10%;  /* Even Darker Grey */
+    --sidebar-foreground: 220 10% 90%;
+    --sidebar-primary: 223 75% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 223 75% 65%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 15% 15%;
+    --sidebar-ring: 223 75% 65%;
   }
 }
 
@@ -113,7 +108,6 @@
     @apply border-border;
   }
   body {
-    /* background-color will be set by Tailwind gradient in layout.tsx */
-    @apply text-foreground;
+    @apply bg-background text-foreground; /* Apply solid background color */
   }
 }

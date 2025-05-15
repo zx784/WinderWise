@@ -10,15 +10,30 @@ import type { SavedPlan } from '@/types/wanderwise';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
-import { Library, MapPin, Calendar, ArrowRight, PlusCircle } from 'lucide-react';
+import { Library, MapPin, Calendar, ArrowRight, PlusCircle, Trash2 } from 'lucide-react';
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, query, getDocs, orderBy, Timestamp, doc, deleteDoc } from 'firebase/firestore';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from '@/hooks/use-toast';
 
 export default function SavedPlansPage() {
   const { currentUser, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
   const [savedPlans, setSavedPlans] = useState<SavedPlan[]>([]);
   const [isLoadingPlans, setIsLoadingPlans] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [planToDelete, setPlanToDelete] = useState<SavedPlan | null>(null);
 
   useEffect(() => {
     if (!authLoading && !currentUser) {
@@ -36,8 +51,7 @@ export default function SavedPlansPage() {
             plans.push({
               id: doc.id,
               userId: data.userId,
-              // Firestore timestamp needs to be converted
-              timestamp: (data.timestamp as Timestamp)?.toDate().getTime() || Date.now(), 
+              timestamp: (data.timestamp as Timestamp)?.toDate().getTime() || Date.now(),
               suggestedCity: data.suggestedCity,
               itineraryData: data.itineraryData,
               finalDestinationCityToDisplay: data.finalDestinationCityToDisplay,
@@ -47,14 +61,37 @@ export default function SavedPlansPage() {
           setSavedPlans(plans);
         } catch (error) {
           console.error("Error loading saved plans from Firestore:", error);
-          // Potentially set an error state to show to the user
+          toast({ title: "Error Loading Plans", description: "Could not fetch your saved plans. Please try again.", variant: "destructive" });
         } finally {
           setIsLoadingPlans(false);
         }
       };
       fetchSavedPlans();
     }
-  }, [currentUser, authLoading, router]);
+  }, [currentUser, authLoading, router, toast]);
+
+  const openDeleteDialog = (plan: SavedPlan) => {
+    setPlanToDelete(plan);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!planToDelete || !currentUser) return;
+    setIsDeleting(true);
+    try {
+      const planDocRef = doc(db, `users/${currentUser.uid}/savedPlans`, planToDelete.id);
+      await deleteDoc(planDocRef);
+      setSavedPlans(prevPlans => prevPlans.filter(p => p.id !== planToDelete.id));
+      toast({ title: "Plan Deleted", description: "The saved plan has been successfully deleted." });
+    } catch (error) {
+      console.error("Error deleting plan:", error);
+      toast({ title: "Delete Failed", description: "Could not delete the plan. Please try again.", variant: "destructive" });
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+      setPlanToDelete(null);
+    }
+  };
 
   if (authLoading || isLoadingPlans) {
     return <div className="flex items-center justify-center min-h-[calc(100vh-200px)]"><LoadingSpinner text="Loading your saved plans..." /></div>;
@@ -85,15 +122,14 @@ export default function SavedPlansPage() {
           {savedPlans.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-xl text-muted-foreground mb-4">You haven't saved any plans yet.</p>
-              {/* Button to Plan a New Trip is now in the header */}
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2">
               {savedPlans.map((plan) => (
-                <Card key={plan.id} className="overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+                <Card key={plan.id} className="overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col">
                   <CardHeader className="bg-secondary/30">
                     <CardTitle className="text-xl text-primary flex items-center gap-2">
-                      <MapPin className="h-5 w-5 flex-shrink-0" /> 
+                      <MapPin className="h-5 w-5 flex-shrink-0" />
                       {plan.finalDestinationCityToDisplay || plan.suggestedCity?.suggestedCity || "Unnamed Plan"}
                     </CardTitle>
                     <CardDescription className="flex items-center gap-1.5 text-sm pt-1">
@@ -101,7 +137,7 @@ export default function SavedPlansPage() {
                       Saved on: {new Date(plan.timestamp).toLocaleDateString()}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="py-3">
+                  <CardContent className="py-3 flex-grow">
                     {plan.itineraryData?.itinerary?.length ? (
                        <p className="text-sm text-muted-foreground">
                          A {plan.itineraryData.itinerary.length}-day adventure awaits!
@@ -112,11 +148,21 @@ export default function SavedPlansPage() {
                        </p>
                     )}
                   </CardContent>
-                  <CardFooter className="bg-muted/30 p-4">
-                    <Button asChild variant="default" size="sm" className="w-full">
+                  <CardFooter className="bg-muted/30 p-4 flex flex-col sm:flex-row sm:justify-between gap-2 items-stretch sm:items-center">
+                    <Button asChild variant="default" size="sm" className="flex-grow sm:flex-grow-0">
                       <Link href={`/saved-plans/${plan.id}`}>
                         View Full Plan <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="flex-grow sm:flex-grow-0"
+                      onClick={() => openDeleteDialog(plan)}
+                      disabled={isDeleting && planToDelete?.id === plan.id}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      {isDeleting && planToDelete?.id === plan.id ? "Deleting..." : "Delete"}
                     </Button>
                   </CardFooter>
                 </Card>
@@ -125,6 +171,27 @@ export default function SavedPlansPage() {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => {
+          setIsDeleteDialogOpen(open);
+          if (!open) setPlanToDelete(null);
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this plan?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the plan for
+              "{planToDelete?.finalDestinationCityToDisplay || planToDelete?.suggestedCity?.suggestedCity || 'this plan'}".
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPlanToDelete(null)} disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

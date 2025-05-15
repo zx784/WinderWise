@@ -31,28 +31,40 @@ export default function SignupPage() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      toast({ title: "Signup Error", description: "Passwords do not match.", variant: "destructive" });
+      const PwdError = "Passwords do not match.";
+      setError(PwdError);
+      toast({ title: "Signup Error", description: PwdError, variant: "destructive" });
       return;
     }
     if (password.length < 6) {
-      setError("Password should be at least 6 characters.");
-      toast({ title: "Signup Error", description: "Password should be at least 6 characters.", variant: "destructive" });
+      const PwdLengthError = "Password should be at least 6 characters.";
+      setError(PwdLengthError);
+      toast({ title: "Signup Error", description: PwdLengthError, variant: "destructive" });
       return;
     }
 
     setIsLoading(true);
+
+    if (!auth) {
+      const authUnavailableError = "Firebase Auth is not available. Please check configuration.";
+      setError(authUnavailableError);
+      toast({ title: "Signup Failed", description: authUnavailableError, variant: "destructive" });
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       if (userCredential.user) {
         await updateProfile(userCredential.user, { displayName });
       }
       toast({ title: "Signup Successful!", description: "Welcome! You are now logged in." });
-      router.push('/profile'); // Or '/' or other designated page
+      router.push('/profile'); 
     } catch (err: any) {
-      console.error("Signup error:", err);
-      setError(err.message);
-      toast({ title: "Signup Failed", description: err.message, variant: "destructive" });
+      console.error("Detailed Signup Error:", err); // Full error object
+      const errorMessage = (err.code ? `(${err.code}) ` : '') + err.message;
+      setError(errorMessage);
+      toast({ title: "Signup Failed", description: errorMessage, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }

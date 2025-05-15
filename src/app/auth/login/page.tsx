@@ -27,14 +27,24 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
+
+    if (!auth) {
+      const authUnavailableError = "Firebase Auth is not available. Please check configuration.";
+      setError(authUnavailableError);
+      toast({ title: "Login Failed", description: authUnavailableError, variant: "destructive" });
+      setIsLoading(false);
+      return;
+    }
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast({ title: "Login Successful!", description: "Welcome back!" });
-      router.push('/profile'); // Or '/' or other designated page
+      router.push('/profile'); 
     } catch (err: any) {
-      console.error("Login error:", err);
-      setError(err.message);
-      toast({ title: "Login Failed", description: err.message, variant: "destructive" });
+      console.error("Detailed Login Error:", err); // Full error object
+      const errorMessage = (err.code ? `(${err.code}) ` : '') + err.message;
+      setError(errorMessage);
+      toast({ title: "Login Failed", description: errorMessage, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -46,12 +56,21 @@ export default function LoginPage() {
       return;
     }
     setIsLoading(true);
+
+    if (!auth) {
+      const authUnavailableError = "Firebase Auth is not available. Please check configuration.";
+      toast({ title: "Password Reset Failed", description: authUnavailableError, variant: "destructive" });
+      setIsLoading(false);
+      return;
+    }
+
     try {
       await sendPasswordResetEmail(auth, email);
       toast({ title: "Password Reset Email Sent", description: "Check your inbox for instructions to reset your password." });
     } catch (err: any) {
-      console.error("Password reset error:", err);
-      toast({ title: "Password Reset Failed", description: err.message, variant: "destructive" });
+      console.error("Detailed Password Reset Error:", err); // Full error object
+      const errorMessage = (err.code ? `(${err.code}) ` : '') + err.message;
+      toast({ title: "Password Reset Failed", description: errorMessage, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }

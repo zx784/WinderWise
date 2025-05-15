@@ -43,9 +43,9 @@ export default function Header() {
         </Link>
         
         <nav className="flex items-center gap-3 md:gap-4">
-          <Link href="/#about-us" className="text-sm hover:text-sky-200 transition-colors hidden md:inline">About</Link>
-          <Link href="/#our-services" className="text-sm hover:text-sky-200 transition-colors hidden md:inline">Services</Link>
-          <Link href="/#contact-us" className="text-sm hover:text-sky-200 transition-colors hidden md:inline">Contact</Link>
+          <Link href="/about" className="text-sm hover:text-sky-200 transition-colors hidden md:inline">About</Link>
+          <Link href="/services" className="text-sm hover:text-sky-200 transition-colors hidden md:inline">Services</Link>
+          <Link href="/contact" className="text-sm hover:text-sky-200 transition-colors hidden md:inline">Contact</Link>
           
           {currentUser ? (
             <DropdownMenu>

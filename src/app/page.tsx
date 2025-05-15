@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react"; // Added useEffect
+import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { useAuth } from "@/context/AuthContext";
 import UserPreferencesForm, { type UserPreferencesFormValues } from "@/components/wanderwise/UserPreferencesForm";
@@ -25,7 +25,6 @@ export default function HomePage() {
   const [itineraryResult, setItineraryResult] = useState<GenerateItineraryOutput | undefined>(undefined);
   const [uploadedImageFileName, setUploadedImageFileName] = useState<string | undefined>(undefined);
   const [finalDestinationCityForDisplay, setFinalDestinationCityForDisplay] = useState<string | undefined>(undefined);
-  // showForm state is no longer needed as form visibility is tied to currentUser
 
   const { toast } = useToast();
   const { currentUser } = useAuth();
@@ -96,65 +95,66 @@ export default function HomePage() {
     }
   };
 
-  // The handleGetStartedClick function is removed as its logic is simplified
-  // and handled by the conditional rendering of the "Get Started" button.
-
   return (
     <div className="space-y-12">
-      {!currentUser ? (
-        // Logged-out view: Hero with "Get Started" button linking to login
-        <section className="text-center py-12 md:py-20 bg-card dark:bg-slate-800/50 rounded-xl shadow-xl">
-          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">
-            Discover Your Next Adventure with WanderWise
-          </h1>
-          <p className="text-lg md:text-xl text-foreground/80 mb-8 max-w-2xl mx-auto">
-            Let our AI craft personalized travel plans tailored to your interests, budget, and style.
-            Spend less time planning and more time exploring!
-          </p>
-          <Button 
-            size="lg" 
-            onClick={() => router.push('/auth/login')} 
-            className="bg-accent hover:bg-accent/90 text-accent-foreground"
-          >
-            <Sparkles className="mr-2 h-5 w-5" /> Get Started
-          </Button>
-        </section>
+      {currentUser ? (
+        // Logged-in view: Generate Plan feature
+        <>
+          <section id="plan-trip">
+            <UserPreferencesForm onSubmit={handleSubmit} isLoading={isLoading} />
+          </section>
+
+          {isLoading && <div className="flex justify-center py-8"><LoadingSpinner text="Crafting your perfect journey..." /></div>}
+
+          {error && !isLoading && (
+            <Alert variant="destructive" className="mt-8">
+              <Terminal className="h-4 w-4" />
+              <AlertTitle>Oops! Something went wrong.</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {!isLoading && !error && (suggestedCityResult || itineraryResult) && (
+            <ResultsDisplay
+              suggestedCity={suggestedCityResult}
+              itineraryData={itineraryResult}
+              uploadedImageFileName={uploadedImageFileName}
+              finalDestinationCityToDisplay={finalDestinationCityForDisplay}
+            />
+          )}
+        </>
       ) : (
-        // Logged-in view: Show the UserPreferencesForm (Generate Plan feature)
-        <section id="plan-trip">
-          <UserPreferencesForm onSubmit={handleSubmit} isLoading={isLoading} />
-        </section>
+        // Logged-out view: Hero with "Get Started" and informational sections
+        <>
+          <section className="text-center py-12 md:py-20 bg-card dark:bg-slate-800/50 rounded-xl shadow-xl">
+            <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">
+              Discover Your Next Adventure with WanderWise
+            </h1>
+            <p className="text-lg md:text-xl text-foreground/80 mb-8 max-w-2xl mx-auto">
+              Let our AI craft personalized travel plans tailored to your interests, budget, and style.
+              Spend less time planning and more time exploring!
+            </p>
+            <Button 
+              size="lg" 
+              onClick={() => router.push('/auth/login')} 
+              className="bg-accent hover:bg-accent/90 text-accent-foreground"
+            >
+              <Sparkles className="mr-2 h-5 w-5" /> Get Started
+            </Button>
+          </section>
+
+          {/* Informational Sections - visible when logged out on homepage */}
+          <section>
+            <AboutSection />
+          </section>
+          <section>
+            <ServicesSection />
+          </section>
+          <section>
+            <ContactSection />
+          </section>
+        </>
       )}
-
-      {isLoading && <div className="flex justify-center py-8"><LoadingSpinner text="Crafting your perfect journey..." /></div>}
-
-      {error && !isLoading && (
-        <Alert variant="destructive" className="mt-8">
-          <Terminal className="h-4 w-4" />
-          <AlertTitle>Oops! Something went wrong.</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {!isLoading && !error && (suggestedCityResult || itineraryResult) && (
-        <ResultsDisplay
-          suggestedCity={suggestedCityResult}
-          itineraryData={itineraryResult}
-          uploadedImageFileName={uploadedImageFileName}
-          finalDestinationCityToDisplay={finalDestinationCityForDisplay}
-        />
-      )}
-
-      {/* Informational Sections - always visible */}
-      <section id="about-us">
-        <AboutSection />
-      </section>
-      <section id="our-services">
-        <ServicesSection />
-      </section>
-      <section id="contact-us">
-        <ContactSection />
-      </section>
     </div>
   );
 }

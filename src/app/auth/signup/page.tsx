@@ -59,7 +59,7 @@ export default function SignupPage() {
         await updateProfile(userCredential.user, { displayName });
       }
       toast({ title: "Signup Successful!", description: "Welcome! You are now logged in." });
-      router.push('/profile'); 
+      router.push('/'); // Redirect to homepage
     } catch (err: any) {
       console.error("Detailed Signup Error:", err); // Full error object
       const errorMessage = (err.code ? `(${err.code}) ` : '') + err.message;

@@ -39,7 +39,7 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast({ title: "Login Successful!", description: "Welcome back!" });
-      router.push('/profile'); 
+      router.push('/'); // Redirect to homepage
     } catch (err: any) {
       console.error("Detailed Login Error:", err); // Full error object
       const errorMessage = (err.code ? `(${err.code}) ` : '') + err.message;

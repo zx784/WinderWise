@@ -136,22 +136,23 @@ export default function ResultsDisplay({
       return;
     }
 
-    const planToSave: Omit<SavedPlan, 'id' | 'timestamp'> & { timestamp: any } = { // Use serverTimestamp for timestamp
+    // Ensure undefined optional fields are set to null for Firestore
+    const planToSave: Omit<SavedPlan, 'id'> & { timestamp: any } = {
       userId: currentUser.uid,
-      suggestedCity: suggestedCity,
-      itineraryData: itineraryData,
-      finalDestinationCityToDisplay: finalDestinationCityToDisplay,
-      uploadedImageFileName: uploadedImageFileName,
-      timestamp: serverTimestamp(), // Firestore server timestamp
+      suggestedCity: suggestedCity || null,
+      itineraryData: itineraryData || null,
+      finalDestinationCityToDisplay: finalDestinationCityToDisplay || null,
+      uploadedImageFileName: uploadedImageFileName || null,
+      timestamp: serverTimestamp(),
     };
 
     try {
       const userPlansCollectionRef = collection(db, `users/${currentUser.uid}/savedPlans`);
       await addDoc(userPlansCollectionRef, planToSave);
       toast({ title: "Trip Saved!", description: "Your trip plan has been saved to your account." });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving plan to Firestore:", error);
-      toast({ title: "Save Failed", description: "Could not save your plan. Please try again.", variant: "destructive" });
+      toast({ title: "Save Failed", description: `Could not save your plan: ${error.message}`, variant: "destructive" });
     }
   };
 
@@ -459,3 +460,4 @@ export default function ResultsDisplay({
     </div>
   );
 }
+

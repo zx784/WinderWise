@@ -18,8 +18,8 @@ const SuggestCityInputSchema = z.object({
     .enum(['budget-friendly', 'mid-range', 'luxury'])
     .describe('The user\u2019s budget preference.'),
   tripDuration: z
-    .enum(['1 day', '2 days', '3 days', '1 week', '10 days', '2 weeks', '1 month', 'custom'])
-    .describe('The preferred trip duration. "custom" implies the user might have a specific duration not listed.'),
+    .string()
+    .describe('The preferred trip duration, e.g., "3 days", "1 week", or "custom". If "custom", the AI should infer a reasonable duration or handle specific day counts like "5 days".'),
   travelStyle: z
     .enum(['relaxed', 'adventurous', 'cultural'])
     .describe('The user\u2019s preferred travel style.'),
@@ -47,7 +47,7 @@ const prompt = ai.definePrompt({
   input: {schema: SuggestCityInputSchema},
   output: {schema: SuggestCityOutputSchema},
   prompt: `Based on the user's preferences, suggest a city for them to visit and justify your suggestion with data.
-Consider the trip duration when making a suggestion. For "custom" duration, assume a flexible mid-length trip unless other factors dictate otherwise.
+Consider the trip duration when making a suggestion. If the duration is "custom", assume a flexible mid-length trip (e.g., 5-7 days) unless other factors dictate otherwise. If a specific number of days is provided (e.g., "5 days"), use that specific duration.
 
 User Preferences:
 Interests: {{#each interests}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}{{#if customInterests}}, and custom interests: {{#each customInterests}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}

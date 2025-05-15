@@ -74,6 +74,13 @@ export const formSchema = z.object({
   customInterests: z.string().optional(),
   budget: z.enum(['budget-friendly', 'mid-range', 'luxury']),
   tripDuration: z.enum(["1 day", "2 days", "3 days", "1 week", "10 days", "2 weeks", "1 month", "custom"]),
+  customTripDurationDays: z.string().optional().refine(
+    (val) => val === undefined || val === "" || /^\d+$/.test(val),
+    { message: "Custom duration must be a number." }
+  ).refine(
+    (val) => val === undefined || val === "" || parseInt(val, 10) > 0,
+    { message: "Custom duration must be a positive number." }
+  ),
   travelStyle: z.enum(['relaxed', 'adventurous', 'cultural']),
   imageFile: z.custom<FileList>().optional(),
 });
@@ -81,17 +88,12 @@ export const formSchema = z.object({
 export type UserPreferencesFormValues = z.infer<typeof formSchema>;
 
 // Ensure AI flow input types match form options
-type ExpectedAISuggestCityTripDuration = AISuggestCityInput['tripDuration'];
-type ExpectedAIGenerateItineraryTripDuration = AIGenerateItineraryInput['tripDuration'];
-
-// This is a type assertion to ensure consistency, it won't run at runtime
-// but will error at build time if types diverge.
-const _tripDurationAssertionSuggest: TripDurationValue = "" as ExpectedAISuggestCityTripDuration;
-const _tripDurationAssertionGenerate: TripDurationValue = "" as ExpectedAIGenerateItineraryTripDuration;
+// Since AI flow tripDuration is now z.string(), direct enum assertion is not applicable.
+// The transformation logic in handleSubmit ensures the string sent to AI is appropriate.
 
 
 interface UserPreferencesFormProps {
-  onSubmit: (values: UserPreferencesFormValues) => void;
+  onSubmit: (values: UserPreferencesFormValues, processedTripDuration: string) => void;
   isLoading: boolean;
 }
 
@@ -103,11 +105,25 @@ export default function UserPreferencesForm({ onSubmit, isLoading }: UserPrefere
       budget: "mid-range",
       tripDuration: "3 days",
       travelStyle: "cultural",
+      customTripDurationDays: "",
     },
   });
 
+  const tripDurationValue = form.watch("tripDuration");
+
   function handleFormSubmit(data: UserPreferencesFormValues) {
-    onSubmit(data);
+    let processedTripDuration = data.tripDuration;
+    if (data.tripDuration === "custom") {
+      const customDays = data.customTripDurationDays ? parseInt(data.customTripDurationDays, 10) : 0;
+      if (customDays > 0) {
+        processedTripDuration = `${customDays} day${customDays > 1 ? 's' : ''}`;
+      } else {
+        // If custom is selected but no valid days entered, send "custom" to AI
+        // AI will use its default logic for "custom"
+        processedTripDuration = "custom"; 
+      }
+    }
+    onSubmit(data, processedTripDuration);
   }
 
   return (
@@ -230,31 +246,71 @@ export default function UserPreferencesForm({ onSubmit, isLoading }: UserPrefere
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="tripDuration"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-lg font-semibold flex items-center gap-2"><CalendarDays className="text-accent"/>Trip Duration</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select trip duration" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {tripDurationOptions.map(option => (
-                           <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Select "Custom" if you have a specific number of days not listed. The AI will adapt.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
+              <div className="space-y-2"> {/* Wrapper for Trip Duration and Custom Days */}
+                <FormField
+                  control={form.control}
+                  name="tripDuration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-lg font-semibold flex items-center gap-2"><CalendarDays className="text-accent"/>Trip Duration</FormLabel>
+                      <Select 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          if (value !== "custom") {
+                            form.setValue("customTripDurationDays", ""); // Clear custom days if not "custom"
+                          }
+                        }} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select trip duration" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {tripDurationOptions.map(option => (
+                             <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Select "Custom" to enter a specific number of days.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {tripDurationValue === "custom" && (
+                  <FormField
+                    control={form.control}
+                    name="customTripDurationDays"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Number of Days (Custom)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            placeholder="E.g., 5" 
+                            {...field} 
+                            min="1"
+                            value={field.value ?? ""}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (val === "" || /^\d+$/.test(val)) {
+                                    field.onChange(val);
+                                }
+                            }}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Enter the specific number of days for your trip.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
-              />
+              </div>
               
               <FormField
               control={form.control}

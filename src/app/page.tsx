@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -19,7 +20,7 @@ export default function HomePage() {
 
   const { toast } = useToast();
 
-  const handleSubmit = async (values: UserPreferencesFormValues) => {
+  const handleSubmit = async (values: UserPreferencesFormValues, processedTripDuration: string) => {
     setIsLoading(true);
     setError(null);
     setSuggestedCityResult(undefined);
@@ -34,7 +35,7 @@ export default function HomePage() {
         const suggestCityPayload: SuggestCityInput = {
           interests: values.interests,
           budget: values.budget,
-          tripDuration: values.tripDuration,
+          tripDuration: processedTripDuration, // Use processed duration
           travelStyle: values.travelStyle,
           customInterests: values.customInterests ? values.customInterests.split(',').map(s => s.trim()).filter(s => s) : [],
         };
@@ -56,11 +57,8 @@ export default function HomePage() {
         destinationCity: finalDestinationCity,
         interests: values.interests,
         budget: values.budget,
-        tripDuration: values.tripDuration,
+        tripDuration: processedTripDuration, // Use processed duration
         travelStyle: values.travelStyle,
-        // Note: customInterests is not part of GenerateItineraryInput schema in the provided AI flow.
-        // If it were, we'd map it:
-        // customInterests: values.customInterests ? values.customInterests.split(',').map(s => s.trim()).filter(s => s) : [],
       };
       
       const itinerary = await generateItinerary(itineraryPayload);
@@ -110,3 +108,4 @@ export default function HomePage() {
     </div>
   );
 }
+

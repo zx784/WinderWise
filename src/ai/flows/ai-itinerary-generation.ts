@@ -21,8 +21,8 @@ const GenerateItineraryInputSchema = z.object({
     .enum(['budget-friendly', 'mid-range', 'luxury'])
     .describe('The user budget preference.'),
   tripDuration: z
-    .enum(['1 day', '2 days', '3 days', '1 week', '10 days', '2 weeks', '1 month', 'custom'])
-    .describe('The duration of the trip. "custom" means the user has a specific duration not listed, the AI should try to accommodate.'),
+    .string()
+    .describe('The duration of the trip, e.g., "3 days", "1 week", or "custom". If "custom", the AI should infer a reasonable duration. If a specific day count like "5 days" is provided, use that.'),
   travelStyle: z
     .enum(['relaxed', 'adventurous', 'cultural'])
     .describe('The user travel style.'),
@@ -59,7 +59,7 @@ const prompt = ai.definePrompt({
   input: {schema: GenerateItineraryInputSchema},
   output: {schema: GenerateItineraryOutputSchema},
   prompt: `You are an expert travel assistant. Generate a personalized, day-by-day itinerary based on the user's preferences.
-If tripDuration is "custom", aim for a reasonable default like 5-7 days unless other factors strongly suggest otherwise.
+If tripDuration is "custom", aim for a reasonable default like 5-7 days unless other factors strongly suggest otherwise. If a specific number of days is provided (e.g. "5 days"), use that exact number of days for the itinerary.
 
 Destination City: {{{destinationCity}}}
 Interests: {{#each interests}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}

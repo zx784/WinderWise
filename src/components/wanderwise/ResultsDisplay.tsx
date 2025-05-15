@@ -18,12 +18,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
+import { useAuth } from "@/context/AuthContext";
+import { db } from "@/lib/firebase"; // Import Firestore instance
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"; // Firestore functions
+import type { SavedPlan } from "@/types/wanderwise";
+
 
 interface ResultsDisplayProps {
   suggestedCity?: SuggestCityOutput;
   itineraryData?: GenerateItineraryOutput;
   uploadedImageFileName?: string;
   finalDestinationCityToDisplay?: string;
+  isViewingSavedPlan?: boolean; // New prop
 }
 
 export default function ResultsDisplay({
@@ -31,11 +37,13 @@ export default function ResultsDisplay({
   itineraryData,
   uploadedImageFileName,
   finalDestinationCityToDisplay,
+  isViewingSavedPlan = false, // Default to false
 }: ResultsDisplayProps) {
   const { toast } = useToast();
+  const { currentUser } = useAuth();
 
   const getDestinationForText = (): string | undefined => {
-    return suggestedCity?.suggestedCity || finalDestinationCityToDisplay;
+    return finalDestinationCityToDisplay || suggestedCity?.suggestedCity;
   };
 
   const formatTripDataForText = (concise: boolean = false): string => {
@@ -94,7 +102,6 @@ export default function ResultsDisplay({
       if (transportation) content += `Transportation: ${transportation}\n`;
       if (activities) content += `Activities: ${activities}\n`;
       
-      // Calculate and add total cost to text version as well
       let totalLowerBound = 0;
       let totalUpperBound = 0;
       const costItemsForTotal = [accommodation, food, transportation, activities];
@@ -119,13 +126,33 @@ export default function ResultsDisplay({
     return content;
   };
 
-  const handleSavePlan = () => {
+  const handleSavePlan = async () => {
+    if (!currentUser) {
+      toast({ title: "Not Logged In", description: "You must be logged in to save a plan.", variant: "destructive" });
+      return;
+    }
     if (!itineraryData && !suggestedCity) {
       toast({ title: "Nothing to save", description: "Generate a plan first.", variant: "destructive" });
       return;
     }
-    localStorage.setItem('wanderwise_saved_trip', JSON.stringify({ suggestedCity, itineraryData, finalDestinationCityToDisplay }));
-    toast({ title: "Trip Saved!", description: "Your trip plan has been saved in your browser." });
+
+    const planToSave: Omit<SavedPlan, 'id' | 'timestamp'> & { timestamp: any } = { // Use serverTimestamp for timestamp
+      userId: currentUser.uid,
+      suggestedCity: suggestedCity,
+      itineraryData: itineraryData,
+      finalDestinationCityToDisplay: finalDestinationCityToDisplay,
+      uploadedImageFileName: uploadedImageFileName,
+      timestamp: serverTimestamp(), // Firestore server timestamp
+    };
+
+    try {
+      const userPlansCollectionRef = collection(db, `users/${currentUser.uid}/savedPlans`);
+      await addDoc(userPlansCollectionRef, planToSave);
+      toast({ title: "Trip Saved!", description: "Your trip plan has been saved to your account." });
+    } catch (error) {
+      console.error("Error saving plan to Firestore:", error);
+      toast({ title: "Save Failed", description: "Could not save your plan. Please try again.", variant: "destructive" });
+    }
   };
 
   const handleDownloadPlan = () => {
@@ -161,7 +188,6 @@ export default function ResultsDisplay({
         author: 'WanderWise App',
       });
 
-      // Main Title
       doc.setFontSize(20);
       doc.setFont(undefined, 'bold');
       checkAndAddPage(lineHeightLarge * 2);
@@ -169,7 +195,6 @@ export default function ResultsDisplay({
       y += lineHeightLarge * 2;
       doc.setFont(undefined, 'normal');
 
-      // Destination
       if (destination) {
         doc.setFontSize(16);
         doc.setFont(undefined, 'bold');
@@ -194,7 +219,6 @@ export default function ResultsDisplay({
         y += lineHeightSmall * justificationLines.length + lineHeightSmall;
       }
 
-      // Itinerary
       if (itineraryData?.itinerary && itineraryData.itinerary.length > 0) {
         doc.setFontSize(16);
         doc.setFont(undefined, 'bold');
@@ -216,7 +240,7 @@ export default function ResultsDisplay({
             let activityText = `- ${activity.description}`;
             if (activity.time) activityText += ` (${activity.time})`;
             
-            const activityLines = doc.splitTextToSize(activityText, contentWidth - 5); // 5 for indent
+            const activityLines = doc.splitTextToSize(activityText, contentWidth - 5); 
             checkAndAddPage(lineHeightSmall * activityLines.length);
             doc.text(activityLines, margin + 5, y);
             y += lineHeightSmall * activityLines.length;
@@ -237,13 +261,12 @@ export default function ResultsDisplay({
               });
               doc.setFont(undefined, 'normal');
             }
-            y += lineHeightSmall * 0.5; // Space between activities
+            y += lineHeightSmall * 0.5; 
           });
-          y += lineHeightMedium; // Space between days
+          y += lineHeightMedium; 
         });
       }
 
-      // Cost Breakdown
       if (itineraryData?.costBreakdown) {
         checkAndAddPage(lineHeightMedium * 2);
         doc.setFontSize(16);
@@ -283,7 +306,7 @@ export default function ResultsDisplay({
         });
         
         if (totalLowerBound > 0 || totalUpperBound > 0) {
-          y += lineHeightSmall * 0.5; // Add a bit of space before total
+          y += lineHeightSmall * 0.5; 
           checkAndAddPage(lineHeightMedium);
           doc.setFontSize(12);
           doc.setFont(undefined, 'bold');
@@ -315,7 +338,7 @@ export default function ResultsDisplay({
     if (platform === 'whatsapp') {
       shareUrl = `https://wa.me/?text=${encodedText}`;
     } else if (platform === 'telegram') {
-      const encodedPageUrl = encodeURIComponent(window.location.href); // Good to share the page link too
+      const encodedPageUrl = encodeURIComponent(window.location.href); 
       shareUrl = `https://t.me/share/url?url=${encodedPageUrl}&text=${encodedText}`;
     }
     
@@ -352,7 +375,7 @@ export default function ResultsDisplay({
     return true;
   });
 
-  const canPerformActions = itineraryData || suggestedCity;
+  const canPerformActions = !isViewingSavedPlan && (itineraryData || suggestedCity);
 
   return (
     <div className="space-y-8 mt-12">
@@ -436,6 +459,3 @@ export default function ResultsDisplay({
     </div>
   );
 }
-
-
-    

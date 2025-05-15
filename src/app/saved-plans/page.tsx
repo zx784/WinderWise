@@ -10,7 +10,9 @@ import type { SavedPlan } from '@/types/wanderwise';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
-import { Library, MapPin, Calendar, ArrowRight } from 'lucide-react';
+import { Library, MapPin, Calendar, ArrowRight, PlusCircle } from 'lucide-react';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
 
 export default function SavedPlansPage() {
   const { currentUser, loading: authLoading } = useAuth();
@@ -22,19 +24,35 @@ export default function SavedPlansPage() {
     if (!authLoading && !currentUser) {
       router.replace('/auth/login');
     } else if (currentUser) {
-      try {
-        const plansFromStorage = localStorage.getItem('wanderwise_saved_plans_array');
-        if (plansFromStorage) {
-          const parsedPlans: SavedPlan[] = JSON.parse(plansFromStorage);
-          // Sort plans by timestamp, newest first
-          parsedPlans.sort((a, b) => b.timestamp - a.timestamp);
-          setSavedPlans(parsedPlans);
+      const fetchSavedPlans = async () => {
+        setIsLoadingPlans(true);
+        try {
+          const plansCollectionRef = collection(db, `users/${currentUser.uid}/savedPlans`);
+          const q = query(plansCollectionRef, orderBy("timestamp", "desc"));
+          const querySnapshot = await getDocs(q);
+          const plans: SavedPlan[] = [];
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            plans.push({
+              id: doc.id,
+              userId: data.userId,
+              // Firestore timestamp needs to be converted
+              timestamp: (data.timestamp as Timestamp)?.toDate().getTime() || Date.now(), 
+              suggestedCity: data.suggestedCity,
+              itineraryData: data.itineraryData,
+              finalDestinationCityToDisplay: data.finalDestinationCityToDisplay,
+              uploadedImageFileName: data.uploadedImageFileName,
+            });
+          });
+          setSavedPlans(plans);
+        } catch (error) {
+          console.error("Error loading saved plans from Firestore:", error);
+          // Potentially set an error state to show to the user
+        } finally {
+          setIsLoadingPlans(false);
         }
-      } catch (error) {
-        console.error("Error loading saved plans from localStorage:", error);
-        // Potentially set an error state to show to the user
-      }
-      setIsLoadingPlans(false);
+      };
+      fetchSavedPlans();
     }
   }, [currentUser, authLoading, router]);
 
@@ -43,25 +61,31 @@ export default function SavedPlansPage() {
   }
 
   if (!currentUser) {
-    // This case should ideally be handled by the redirect, but as a fallback
     return <div className="flex items-center justify-center min-h-[calc(100vh-200px)]"><p>Please log in to view your saved plans.</p></div>;
   }
 
   return (
     <div className="py-8">
       <Card className="w-full max-w-4xl mx-auto shadow-xl bg-card">
-        <CardHeader className="text-center border-b pb-4">
-          <Library className="mx-auto h-12 w-12 text-primary mb-3" />
-          <CardTitle className="text-3xl font-bold">My Saved Plans</CardTitle>
-          <CardDescription>Here are all the amazing trips you've planned with WanderWise.</CardDescription>
+        <CardHeader className="text-center border-b pb-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-3">
+            <Library className="h-10 w-10 text-primary" />
+            <div>
+              <CardTitle className="text-3xl font-bold text-left">My Saved Plans</CardTitle>
+              <CardDescription className="text-left">Here are all the amazing trips you've planned.</CardDescription>
+            </div>
+          </div>
+          <Button asChild variant="outline">
+            <Link href="/">
+              <PlusCircle className="mr-2 h-4 w-4" /> Plan a New Trip
+            </Link>
+          </Button>
         </CardHeader>
         <CardContent className="p-6">
           {savedPlans.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-xl text-muted-foreground mb-4">You haven't saved any plans yet.</p>
-              <Button asChild>
-                <Link href="/">Plan a New Trip</Link>
-              </Button>
+              {/* Button to Plan a New Trip is now in the header */}
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2">

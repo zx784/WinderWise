@@ -28,19 +28,18 @@ if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "your_api_key_here" || f
 
 if (!firebaseConfig.authDomain || typeof firebaseConfig.authDomain !== 'string' || firebaseConfig.authDomain.includes("your-project-id") || firebaseConfig.authDomain.trim() === "" || firebaseConfig.authDomain === "YOUR_ACTUAL_AUTH_DOMAIN_HERE") {
   configErrorMessage += "** Your Firebase Auth Domain (NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN) might be incorrect, missing, or using a placeholder.\n";
-  console.error("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: STATUS - MISSING or PLACEHOLDER");
+  console.error("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: STATUS - MISSING or PLACEHOLDER/INCORRECT");
 } else {
   console.log("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: STATUS - Loaded (value:", firebaseConfig.authDomain, ")");
 }
 
 if (!firebaseConfig.projectId || typeof firebaseConfig.projectId !== 'string' || firebaseConfig.projectId.includes("your-project-id") || firebaseConfig.projectId.trim() === "" || firebaseConfig.projectId === "YOUR_ACTUAL_PROJECT_ID_HERE") {
   configErrorMessage += "** Your Firebase Project ID (NEXT_PUBLIC_FIREBASE_PROJECT_ID) might be incorrect, missing, or using a placeholder.\n";
-  console.error("NEXT_PUBLIC_FIREBASE_PROJECT_ID: STATUS - MISSING or PLACEHOLDER");
+  console.error("NEXT_PUBLIC_FIREBASE_PROJECT_ID: STATUS - MISSING or PLACEHOLDER/INCORRECT");
 } else {
   console.log("NEXT_PUBLIC_FIREBASE_PROJECT_ID: STATUS - Loaded (value:", firebaseConfig.projectId, ")");
 }
 
-// You can add similar checks for other variables like storageBucket, messagingSenderId, appId if they are critical for your app's startup.
 
 if (configErrorMessage) {
   console.error(
@@ -51,7 +50,8 @@ if (configErrorMessage) {
     "** set up with your actual Firebase project credentials. Values should be enclosed    **\n" +
     "** in quotes, e.g., NEXT_PUBLIC_FIREBASE_API_KEY=\"AIzaSy...\".                         **\n" +
     "** Also, verify that the Email/Password sign-in method is ENABLED in your Firebase    **\n" +
-    "** project's Authentication settings in the Firebase Console.                          **\n" +
+    "** project's Authentication settings, and that Firestore database is CREATED and has  **\n" +
+    "** appropriate security rules if you intend to use it.                                 **\n" +
     "******************************************************************************************"
   );
 } else {
@@ -68,7 +68,7 @@ if (!getApps().length) {
   } catch (e: any) {
     console.error("!!! Firebase initialization FAILED:", e.message, "(Code:", e.code, ")");
     // @ts-ignore
-    app = undefined; // Ensure app is undefined if init fails
+    app = undefined; 
   }
 } else {
   app = getApp();
@@ -80,12 +80,33 @@ const auth: Auth = app ? getAuth(app) : undefined;
 // @ts-ignore
 const db: Firestore = app ? getFirestore(app) : undefined;
 
-if (!auth) {
+if (!auth && app) { // Check app to avoid error if app init failed
     console.error("!!! Firebase Auth could not be initialized. Authentication will not work. !!!");
 }
-if (!db) {
+if (!db && app) {  // Check app to avoid error if app init failed
     console.error("!!! Firebase Firestore could not be initialized. Firestore operations will not work. !!!");
 }
 
+/*
+Recommended Firestore Security Rules for savedPlans:
+(Add these in your Firebase Console -> Firestore Database -> Rules tab)
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Match any document in the 'users' collection
+    match /users/{userId} {
+      // Allow a user to read and write to their own document
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Match any document in the 'savedPlans' subcollection of a user's document
+      match /savedPlans/{planId} {
+        // Allow a user to read, write, and delete their own saved plans
+        allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}
+*/
 
 export { app, auth, db };

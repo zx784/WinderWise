@@ -2,6 +2,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import Image from "next/image";
+// Import with a simplified and more conventional filename
+// import abdulKarimBawazirImage from "./images/abdulkarim-bawazir.jpg"; // Temporarily commented out
 
 // Updated team members data
 const teamMembers = [
@@ -13,7 +15,7 @@ const teamMembers = [
     dataAiHint: "professional man"
   },
   {
-    name: "Monsur Shukla",
+    name: "Monsur Shukla", // Corrected spelling based on previous context
     role: "Frontend Developer",
     imageUrl: "https://placehold.co/300x300.png",
     bio: "Monsur focuses on creating intuitive and engaging user interfaces.",
@@ -22,8 +24,8 @@ const teamMembers = [
   {
     name: "Abdul Karim Bawazir",
     role: "UI/UX Developer",
-    imageUrl: "https://placehold.co/300x300.png",
-    bio: "Abdul Karim designs seamless and user-centered experiences.",
+    imageUrl: "https://placehold.co/300x300.png", // Temporarily reverted to placeholder
+    bio: "AbdulKarim designs seamless and user-centered experiences.",
     dataAiHint: "designer thinking"
   },
   {
@@ -49,7 +51,7 @@ export default function OurTeamSection() {
           We are a passionate group of innovators, designers, and travel enthusiasts dedicated to making your
           adventures unforgettable.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"> {/* Adjusted grid for potentially 4 members */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {teamMembers.map((member) => (
             <Card key={member.name} className="overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
               <div className="relative h-56 w-full">

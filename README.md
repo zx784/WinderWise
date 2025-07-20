@@ -69,7 +69,7 @@
 
 ## 📌 Summary
 
-Travel Genie uses the power of Firebase Studio AI and Firebase services to deliver a smart, dynamic, and user-centric travel planning experience. Whether you know where you want to go or need a spark of inspiration, Travel Genie helps turn your preferences into unforgettable journeys.
+Travel Genie uses the power of Firebase Studio AI and Firebase services to deliver a smart, dynamic, and user-centric travel planning experience. Whether you know where you want to go or need a spark of inspiration, Travel Genie helps turn your preferences into unforgettable journeys..
 
 ---
 
